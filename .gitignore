@@ -1,0 +1,22 @@
+# Java / Maven
+target/
+*.class
+*.log
+# IDE
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
+.sts4-cache/
+*.iml
+# Node
+node_modules/
+dist/
+# Env / secrets
+.env
+*.env.local
+application-local.yml
+# OS
+.DS_Store
+Thumbs.db
