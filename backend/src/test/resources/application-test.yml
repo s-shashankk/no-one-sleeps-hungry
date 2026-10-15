@@ -1,0 +1,9 @@
+mealup:
+  admin:
+    full-name: Test Founder
+    phone: "+910000000001"
+    email: founder@test.mealup
+    password: Test-Founder-Pass-1
+  rate-limit:
+    public-per-hour: 100000      # tests post many forms and log in a lot from one address
+    login-per-10-minutes: 100000

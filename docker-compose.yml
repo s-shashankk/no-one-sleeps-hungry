@@ -2,11 +2,11 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: nosleepshungry-mysql
+    container_name: mealup-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nosleepshungry
+      MYSQL_DATABASE: mealup
     ports:
       - "3306:3306"
     volumes:

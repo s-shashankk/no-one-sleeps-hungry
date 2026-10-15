@@ -1,3 +1,5 @@
+> **Superseded (Oct 2026).** MealUp was simplified to vendors, coworkers and requests; see [PLAN.md](../PLAN.md) and [README.md](../README.md). This original spec is kept for history and no longer describes the product.
+
 # MealUp --- Community Food Rescue & Redistribution Platform
 
 ## Product Concept, Roles, Workflows, and Implementation Brief for an LLM

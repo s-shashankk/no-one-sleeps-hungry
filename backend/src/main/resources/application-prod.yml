@@ -1,0 +1,31 @@
+# Production: nothing secret has a default. Everything comes from environment variables.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+server:
+  forward-headers-strategy: native      # Tomcat trusts X-Forwarded-For/-Proto only from a proxy on this machine or a private network
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+mealup:
+  security:
+    csp: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"   # API answers never need to load anything
+  rate-limit:
+    public-per-hour: ${MEALUP_RATE_PUBLIC_PER_HOUR:20}          # public form submissions per address
+    login-per-10-minutes: ${MEALUP_RATE_LOGIN_PER_10_MIN:10}    # sign-in / invitation attempts per address
+  admin:                          # only read when no admin account exists yet (first start)
+    full-name: ${MEALUP_ADMIN_NAME:}
+    phone: ${MEALUP_ADMIN_PHONE:}
+    email: ${MEALUP_ADMIN_EMAIL:}
+    password: ${MEALUP_ADMIN_PASSWORD:}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

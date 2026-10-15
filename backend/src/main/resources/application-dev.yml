@@ -1,0 +1,13 @@
+# Local development only. Never use these values in production.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/mealup?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&connectionTimeZone=UTC}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:Shashukushi@007}
+
+mealup:
+  admin:                          # the first admin, created only if no account exists yet
+    full-name: ${MEALUP_ADMIN_NAME:Founder (dev)}
+    phone: ${MEALUP_ADMIN_PHONE:+910000000000}
+    email: ${MEALUP_ADMIN_EMAIL:founder@mealup.local}
+    password: ${MEALUP_ADMIN_PASSWORD:DevOnly#Pass2026}
