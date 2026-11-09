@@ -12,7 +12,7 @@ import org.springframework.mock.web.MockHttpSession;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mealup.support.ApiTestSupport;
 
-/** The dashboard shows exactly four numbers. */
+/** The dashboard shows a fixed set of numbers. */
 class DashboardTest extends ApiTestSupport {
 
     private JsonNode summary(MockHttpSession admin) throws Exception {
@@ -21,13 +21,14 @@ class DashboardTest extends ApiTestSupport {
     }
 
     @Test
-    void showsTheFourNumbersAndNothingElse() throws Exception {
+    void showsTheAgreedNumbersAndNothingElse() throws Exception {
         MockHttpSession admin = loginAsFounder();
 
         JsonNode s = summary(admin);
 
         assertThat(s.fieldNames()).toIterable()
-                .containsExactlyInAnyOrder("totalMealsDelivered", "activeVendors", "activeCoworkers", "pendingRequests");
+                .containsExactlyInAnyOrder("totalMealsDelivered", "activeVendors", "activeCoworkers", "pendingRequests",
+                        "newPickups", "newJoinRequests", "openAreas", "cities", "volunteers", "newMessages");
     }
 
     @Test

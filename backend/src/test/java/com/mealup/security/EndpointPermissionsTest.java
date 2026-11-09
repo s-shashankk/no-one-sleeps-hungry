@@ -81,11 +81,14 @@ class EndpointPermissionsTest extends ApiTestSupport {
     }
 
     @Test
-    void thePublicFormsAreTheOnlyWayInWithoutSigningInAndTheyOnlyAcceptPosts() {
+    void thePublicEndpointsAreExactlyTheKnownOnes() {
         List<String> publicEndpoints = endpoints().stream().filter(e -> e.pattern().startsWith("/api/v1/public/"))
                 .map(Endpoint::toString).sorted().toList();
 
         assertThat(publicEndpoints).containsExactly(
-                "POST /api/v1/public/hunger-reports", "POST /api/v1/public/surplus-food-reports");
+                "GET /api/v1/public/areas", "GET /api/v1/public/areas/{areaId}/hotels", "GET /api/v1/public/hotels/{id}/logo",
+                "GET /api/v1/public/impact", "GET /api/v1/public/partners",
+                "POST /api/v1/public/hunger-reports", "POST /api/v1/public/join-requests",
+                "POST /api/v1/public/register", "POST /api/v1/public/surplus-food-reports");
     }
 }

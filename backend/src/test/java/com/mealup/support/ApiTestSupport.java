@@ -56,6 +56,18 @@ public abstract class ApiTestSupport extends AbstractMySqlIntegrationTest {
         return login(FOUNDER_EMAIL, FOUNDER_PASSWORD);
     }
 
+    /** A new volunteer signs up (and is signed in straight away). */
+    protected MockHttpSession registerVolunteer(String email) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", "Vol Tester");
+        body.put("email", email);
+        body.put("phone", uniquePhone());
+        body.put("password", PASSWORD);
+        body.put("consent", true);
+        return (MockHttpSession) postJson("/api/v1/public/register", body, null)
+                .andExpect(status().isCreated()).andReturn().getRequest().getSession(false);
+    }
+
     protected ResultActions getAs(MockHttpSession session, String url) throws Exception {
         MockHttpServletRequestBuilder req = get(url);
         if (session != null) req.session(session);

@@ -1,6 +1,10 @@
 spring:
   application:
     name: mealup
+  servlet:
+    multipart:
+      max-file-size: 600KB        # hotel logos
+      max-request-size: 700KB
   jpa:
     open-in-view: false
     hibernate:

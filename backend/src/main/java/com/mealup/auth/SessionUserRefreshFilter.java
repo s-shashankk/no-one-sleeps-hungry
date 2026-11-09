@@ -10,8 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.mealup.access.AuthenticatedUser;
-import com.mealup.users.User;
-import com.mealup.users.UserRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,14 +18,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Runs on every request that carries a login session and re-reads the person from the database.
+ * Runs on every request that carries a login session and re-checks the person (from a short-lived memory copy, see UserCheckCache).
  * A disabled (or deleted) account loses access on the very next request. Not a Spring bean on purpose: SecurityConfig adds it to the chain.
  */
 public class SessionUserRefreshFilter extends OncePerRequestFilter {
 
-    private final UserRepository users;
+    private final UserCheckCache users;
 
-    public SessionUserRefreshFilter(UserRepository users) {
+    public SessionUserRefreshFilter(UserCheckCache users) {
         this.users = users;
     }
 
@@ -37,15 +35,15 @@ public class SessionUserRefreshFilter extends OncePerRequestFilter {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication auth = context.getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser sessionUser) {
-            Optional<User> current = users.findById(sessionUser.id());
-            if (current.isEmpty() || !current.get().isActive()) {
+            Optional<AuthenticatedUser> current = users.lookup(sessionUser.id());
+            if (current.isEmpty()) {
                 SecurityContextHolder.clearContext();
                 HttpSession session = request.getSession(false);
                 if (session != null) {
                     session.invalidate();
                 }
             } else {
-                AuthenticatedUser fresh = AuthenticatedUser.from(current.get());
+                AuthenticatedUser fresh = current.get();
                 context.setAuthentication(
                         UsernamePasswordAuthenticationToken.authenticated(fresh, null, fresh.authorities()));
             }

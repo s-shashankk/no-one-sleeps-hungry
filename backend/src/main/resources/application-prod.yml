@@ -4,8 +4,21 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20         # database connections (MySQL allows 100 in docker-compose.prod.yml)
+      minimum-idle: 5
+      connection-timeout: 10000     # a request waits at most 10 s for a connection, then fails fast instead of piling up
+      max-lifetime: 1500000
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
 
 server:
+  shutdown: graceful                    # a restart lets running requests finish
+  tomcat:
+    threads:
+      max: 100
+    accept-count: 100
+    connection-timeout: 15s
   forward-headers-strategy: native      # Tomcat trusts X-Forwarded-For/-Proto only from a proxy on this machine or a private network
   servlet:
     session:

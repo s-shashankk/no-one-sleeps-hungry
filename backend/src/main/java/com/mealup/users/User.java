@@ -5,7 +5,7 @@ import java.time.ZoneOffset;
 
 import jakarta.persistence.*;
 
-/** An admin who can sign in to the website. (Coworkers and vendors are plain records; they do not sign in.) */
+/** Someone who can sign in: an admin, or a volunteer who signed up. (Coworkers and vendors are plain records; they do not sign in.) */
 @Entity
 @Table(name = "users")
 public class User {
@@ -24,6 +24,14 @@ public class User {
 
     @Column(name = "password_hash")
     private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.ADMIN;
+
+    /** For hotel staff: the hotel they work for. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id")
+    private com.mealup.vendors.Vendor vendor;
 
     @Column(name = "is_active")
     private boolean active = true;
@@ -46,6 +54,13 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    /** A volunteer account. */
+    public static User volunteer(String fullName, String phoneNumber, String email, String passwordHash) {
+        User u = new User(fullName, phoneNumber, email, passwordHash);
+        u.role = Role.VOLUNTEER;
+        return u;
+    }
+
     @PrePersist
     void onCreate() {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
@@ -58,14 +73,24 @@ public class User {
         updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
+    /** The admin gives this person hotel-staff access for one hotel. */
+    public void makeHotelStaff(com.mealup.vendors.Vendor hotel) { this.role = Role.HOTEL; this.vendor = hotel; }
+
+    /** Back to an ordinary volunteer. */
+    public void makeVolunteer() { this.role = Role.VOLUNTEER; this.vendor = null; }
+
     public void recordLogin() { this.lastLoginAt = LocalDateTime.now(ZoneOffset.UTC); }
     public void setActive(boolean active) { this.active = active; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
     public Long getId() { return id; }
     public String getFullName() { return fullName; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
+    public com.mealup.vendors.Vendor getVendor() { return vendor; }
+    public Role getRole() { return role; }
     public boolean isActive() { return active; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getLastLoginAt() { return lastLoginAt; }
 }

@@ -73,7 +73,7 @@ export default function SurplusFood() {
 
       <label className="check">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required />
-        I agree that MealUp may use these details only to arrange the pickup.
+        I agree that helpsomeone.in may use these details only to arrange the pickup.
       </label>
       {error && <p className="error">{error}</p>}
       <p className="muted">See our <Link to="/privacy">privacy notice</Link>.</p>

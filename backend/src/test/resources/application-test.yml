@@ -1,4 +1,7 @@
 mealup:
+  cache:
+    user-check-seconds: 0        # tests change accounts directly in the database and expect it to count at once
+    public-enabled: false        # tests expect new data to show up straight away
   admin:
     full-name: Test Founder
     phone: "+910000000001"

@@ -3,6 +3,8 @@ package com.mealup.vendors;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import com.mealup.areas.Area;
+
 import jakarta.persistence.*;
 
 /** A hotel, restaurant, caterer or event host the admin phones to ask about surplus food. */
@@ -25,6 +27,19 @@ public class Vendor {
     private String location;
 
     private String notes;
+
+    /** The neighbourhood this vendor is in (shown to volunteers who want to collect food). Optional. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "area_id")
+    private Area area;
+
+    /** How many pickups volunteers may book at this hotel in one day. */
+    @Column(name = "daily_limit")
+    private int dailyLimit = 5;
+
+    /** The hotel's own map link (https), chosen by the admin; null means "search the address". */
+    @Column(name = "map_url", length = 500)
+    private String mapUrl;
 
     @Column(name = "is_active")
     private boolean active = true;
@@ -56,7 +71,8 @@ public class Vendor {
         updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
-    public void change(String name, String contactPerson, String phoneNumber, String location, String notes) {
+    public void change(String name, String contactPerson, String phoneNumber, String location, String notes, Area area) {
+        this.area = area;
         this.name = name;
         this.contactPerson = contactPerson;
         this.phoneNumber = phoneNumber;
@@ -64,7 +80,14 @@ public class Vendor {
         this.notes = notes;
     }
 
+    public void setDailyLimit(int dailyLimit) { this.dailyLimit = dailyLimit; }
+    public int getDailyLimit() { return dailyLimit; }
+    public String getMapUrl() { return mapUrl; }
+    public void setMapUrl(String mapUrl) { this.mapUrl = mapUrl; }
+
     public void setActive(boolean active) { this.active = active; }
+
+    public void setArea(Area area) { this.area = area; }
 
     public Long getId() { return id; }
     public String getName() { return name; }
@@ -72,6 +95,7 @@ public class Vendor {
     public String getPhoneNumber() { return phoneNumber; }
     public String getLocation() { return location; }
     public String getNotes() { return notes; }
+    public Area getArea() { return area; }
     public boolean isActive() { return active; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }

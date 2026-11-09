@@ -20,7 +20,7 @@ class FlywayMigrationTest extends AbstractMySqlIntegrationTest {
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE()", String.class)
                 .stream().map(String::toLowerCase).toList();
 
-        assertThat(tables).containsExactlyInAnyOrder("users", "vendors", "coworkers", "requests", "flyway_schema_history");
+        assertThat(tables).containsExactlyInAnyOrder("users", "vendors", "coworkers", "requests", "areas", "pickups", "join_requests", "vendor_logos", "flyway_schema_history");
     }
 
     @Test

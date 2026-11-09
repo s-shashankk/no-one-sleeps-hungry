@@ -24,3 +24,7 @@ Thumbs.db
 data/
 backend/data/
 _backup_before_simplify.tar.gz
+deploy/.env
+
+# Personal notes with logins (private)
+USEME.md

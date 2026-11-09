@@ -43,6 +43,6 @@ public class AuthService {
     @Transactional(readOnly = true)
     public MeResponse me(AuthenticatedUser current) {
         User user = users.findById(current.id()).orElseThrow(() -> new UnauthorizedException("Authentication is required."));
-        return new MeResponse(user.getId(), user.getFullName(), user.getEmail(), user.getPhoneNumber());
+        return new MeResponse(user.getId(), user.getFullName(), user.getEmail(), user.getPhoneNumber(), user.getRole());
     }
 }

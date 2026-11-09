@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 560" role="img" aria-label="A meal served on a banana leaf with steaming rice, sambar, vegetables, papad and a sweet">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4DAA6B"/>
+      <stop offset="1" stop-color="#1F6B42"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#F4B41A" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#F4B41A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rice" cx=".4" cy=".35" r=".7">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EDE8D6"/>
+    </radialGradient>
+  </defs>
+
+  <!-- warm light behind the plate -->
+  <circle cx="330" cy="250" r="250" fill="url(#sun)"/>
+
+  <!-- city skyline -->
+  <g fill="#0E3322" opacity=".55">
+    <rect x="30" y="360" width="46" height="120"/>
+    <rect x="84" y="330" width="38" height="150"/>
+    <rect x="130" y="380" width="52" height="100"/>
+    <rect x="470" y="340" width="44" height="140"/>
+    <rect x="522" y="370" width="58" height="110"/>
+    <rect x="588" y="350" width="34" height="130"/>
+  </g>
+
+  <!-- shadow -->
+  <ellipse cx="320" cy="470" rx="250" ry="32" fill="#06180F" opacity=".35"/>
+
+  <!-- banana leaf -->
+  <g transform="rotate(-6 320 300)">
+    <path d="M40 300C110 130 530 130 600 300C530 470 110 470 40 300Z" fill="url(#leaf)"/>
+    <path d="M40 300H600" stroke="#14452F" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="#14452F" stroke-width="2" opacity=".35" stroke-linecap="round">
+      <path d="M120 300L96 224M120 300L96 376M200 300L180 190M200 300L180 410M290 300L276 168M290 300L276 432M380 300L372 168M380 300L372 432M470 300L474 190M470 300L474 410M540 300L554 236M540 300L554 364"/>
+    </g>
+  </g>
+
+  <!-- rice mound -->
+  <g transform="rotate(-6 320 300)">
+    <ellipse cx="300" cy="292" rx="92" ry="64" fill="url(#rice)"/>
+    <g fill="#D9D2BA">
+      <ellipse cx="262" cy="270" rx="6" ry="2.6" transform="rotate(-20 262 270)"/>
+      <ellipse cx="300" cy="256" rx="6" ry="2.6" transform="rotate(10 300 256)"/>
+      <ellipse cx="338" cy="272" rx="6" ry="2.6" transform="rotate(30 338 272)"/>
+      <ellipse cx="280" cy="298" rx="6" ry="2.6" transform="rotate(-5 280 298)"/>
+      <ellipse cx="324" cy="302" rx="6" ry="2.6" transform="rotate(25 324 302)"/>
+      <ellipse cx="302" cy="326" rx="6" ry="2.6" transform="rotate(-15 302 326)"/>
+    </g>
+    <!-- steam -->
+    <g stroke="#FFF7DC" stroke-width="5" stroke-linecap="round" fill="none" opacity=".85">
+      <path d="M268 226c-14-20 14-26 0-48"/>
+      <path d="M302 218c-14-20 14-26 0-48"/>
+      <path d="M336 226c-14-20 14-26 0-48"/>
+    </g>
+
+    <!-- sambar bowl -->
+    <circle cx="468" cy="238" r="42" fill="#B8532B"/>
+    <circle cx="468" cy="238" r="34" fill="#E08A2E"/>
+    <circle cx="456" cy="230" r="5" fill="#C25A1B"/>
+    <circle cx="480" cy="248" r="6" fill="#F0B35A"/>
+    <circle cx="470" cy="222" r="4" fill="#4C8B3A"/>
+
+    <!-- vegetable poriyal -->
+    <g>
+      <ellipse cx="170" cy="236" rx="52" ry="36" fill="#2B6A35"/>
+      <circle cx="152" cy="228" r="7" fill="#7BC450"/><circle cx="176" cy="238" r="8" fill="#9ED36A"/>
+      <circle cx="196" cy="224" r="6" fill="#7BC450"/><circle cx="160" cy="250" r="6" fill="#F4B41A"/>
+      <circle cx="186" cy="252" r="5" fill="#E8553B"/>
+    </g>
+
+    <!-- beetroot / carrot side -->
+    <g>
+      <ellipse cx="176" cy="366" rx="48" ry="32" fill="#8C1D3F"/>
+      <circle cx="160" cy="360" r="8" fill="#B23A5E"/><circle cx="184" cy="372" r="9" fill="#A02B4D"/>
+      <circle cx="198" cy="356" r="6" fill="#C24A6C"/>
+    </g>
+
+    <!-- papad -->
+    <circle cx="410" cy="362" r="46" fill="#F0C063"/>
+    <circle cx="410" cy="362" r="46" fill="none" stroke="#D99A2B" stroke-width="3" stroke-dasharray="5 7"/>
+    <circle cx="432" cy="390" r="36" fill="#F4CB78"/>
+    <circle cx="432" cy="390" r="36" fill="none" stroke="#D99A2B" stroke-width="3" stroke-dasharray="4 6"/>
+
+    <!-- pickle & sweet -->
+    <circle cx="312" cy="384" r="14" fill="#B1261B"/>
+    <circle cx="316" cy="380" r="4" fill="#E2584B"/>
+    <circle cx="262" cy="398" r="20" fill="#E0892A"/>
+    <circle cx="262" cy="398" r="20" fill="none" stroke="#B8651A" stroke-width="3"/>
+    <circle cx="256" cy="392" r="4" fill="#F9D9A0"/>
+  </g>
+</svg>

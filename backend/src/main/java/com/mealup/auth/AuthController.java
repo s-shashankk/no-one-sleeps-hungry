@@ -1,10 +1,7 @@
 package com.mealup.auth;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +22,12 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final AuthService authService;
-    private final SecurityContextRepository contextRepository;
+    private final SessionLogin sessionLogin;
     private final AccessPolicy access;
 
-    public AuthController(AuthService authService, SecurityContextRepository contextRepository, AccessPolicy access) {
+    public AuthController(AuthService authService, SessionLogin sessionLogin, AccessPolicy access) {
         this.authService = authService;
-        this.contextRepository = contextRepository;
+        this.sessionLogin = sessionLogin;
         this.access = access;
     }
 
@@ -45,14 +42,7 @@ public class AuthController {
                             HttpServletResponse response) {
         AuthenticatedUser user = authService.login(body.email(), body.password());
 
-        // A new session id after login prevents session fixation.
-        if (request.getSession(false) != null) {
-            request.changeSessionId();
-        }
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(user, null, user.authorities()));
-        SecurityContextHolder.setContext(context);
-        contextRepository.saveContext(context, request, response);
+        sessionLogin.start(user, request, response);
 
         return authService.me(user);
     }

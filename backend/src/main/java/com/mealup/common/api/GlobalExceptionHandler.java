@@ -16,6 +16,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.mealup.common.exception.ApiException;
@@ -51,9 +53,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
-            MissingServletRequestParameterException.class})
+            MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
     ResponseEntity<ApiError> handleBadRequest(Exception ex, HttpServletRequest req) {
         return respond(HttpStatus.BAD_REQUEST, "The request could not be read. Please check the values sent.", req, List.of());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiError> handleTooBig(MaxUploadSizeExceededException ex, HttpServletRequest req) {
+        return respond(HttpStatus.PAYLOAD_TOO_LARGE, "That file is too big. Use an image smaller than 500 KB.", req, List.of());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

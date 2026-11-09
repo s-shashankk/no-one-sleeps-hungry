@@ -1,11 +1,16 @@
 # Local development only. Never use these values in production.
 spring:
+  config:
+    import: optional:file:./application-local.yml   # private, git-ignored settings for this computer
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/mealup?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&connectionTimeZone=UTC}
     username: ${DB_USER:root}
-    password: ${DB_PASSWORD:Shashukushi@007}
+    password: ${DB_PASSWORD:change-me}
 
 mealup:
+  cache:
+    public-enabled: false         # live numbers while developing; production refreshes them once a day
+  demo-data: ${MEALUP_DEMO_DATA:true}   # sample hotels, volunteers and a pickup so the flow can be tried; set false to skip
   admin:                          # the first admin, created only if no account exists yet
     full-name: ${MEALUP_ADMIN_NAME:Founder (dev)}
     phone: ${MEALUP_ADMIN_PHONE:+910000000000}

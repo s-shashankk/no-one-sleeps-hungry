@@ -1,0 +1,25 @@
+# Copy to deploy/application-local.yml ON THE SERVER and fill it in. Git ignores the real file, so it is never pushed.
+# It is read when the API starts. Anything that already exists is left alone, so it is safe to start again.
+
+mealup:
+  launch:                       # the one partner hotel, and the plates served before launch
+    hotel-name: Sherpa
+    hotel-contact: CHANGE-ME     # name of the person to call (optional)
+    hotel-phone: "+91XXXXXXXXXX" # the hotel's real phone number (needed)
+    hotel-address: CHANGE-ME     # address shown to volunteers (needed)
+    hotel-map-url: ""            # Google Maps share link (optional, can be added later in Hotels)
+    area-name: Indiranagar
+    area-city: Bengaluru
+    opening-plates: 45           # plates already served, so the website starts at 45
+  local:
+    users:                       # the admin is created from deploy/.env; these are the other logins
+      - name: Shashank Hotel
+        email: shashankhotel@gmail.com
+        phone: "+919000000098"
+        password: CHANGE-ME       # 12 or more characters. A login with CHANGE-ME is skipped.
+        role: HOTEL
+      - name: Shashank Helper
+        email: shashankhelper@gmail.com
+        phone: "+919000000096"
+        password: CHANGE-ME
+        role: VOLUNTEER

@@ -20,18 +20,19 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 import com.mealup.auth.SessionUserRefreshFilter;
-import com.mealup.users.UserRepository;
+import com.mealup.auth.UserCheckCache;
 
 /**
  * Login is a server-side session in an HttpOnly cookie. State-changing requests need the CSRF header
- * (the frontend copies it from the XSRF-TOKEN cookie). Everything except the public forms and
- * sign-in needs a signed-in admin; services check this again through AccessPolicy.
+ * (the frontend copies it from the XSRF-TOKEN cookie). Everything except the public forms, sign-up and
+ * sign-in needs a signed-in person; admin pages need an admin and /me needs a volunteer.
+ * Services check this again through AccessPolicy.
  */
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, SecurityErrorHandlers errors, UserRepository users,
+    SecurityFilterChain filterChain(HttpSecurity http, SecurityErrorHandlers errors, UserCheckCache users,
                                     SecurityContextRepository contextRepository,
                                     @Value("${mealup.security.csp:}") String contentSecurityPolicy) throws Exception {
         // Plain handler: the token is created only when something asks for it (GET /auth/csrf).
@@ -63,7 +64,15 @@ public class SecurityConfig {
                         "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/logout").permitAll()
-                .requestMatchers("/api/v1/public/**").permitAll()      // public forms; they only ever create pending records
+                .requestMatchers("/api/v1/public/**").permitAll()      // public forms and sign-up; they only ever create pending records
+                .requestMatchers("/api/v1/auth/me").authenticated()    // admin or volunteer
+                .requestMatchers(HttpMethod.POST, "/api/v1/me/password").hasAnyRole("VOLUNTEER", "HOTEL")
+                .requestMatchers("/api/v1/account/**").hasAnyRole("VOLUNTEER", "HOTEL")   // write to the admin
+                .requestMatchers("/api/v1/hotel/**").hasRole("HOTEL")      // hotel staff: only their own hotel's pickups
+                .requestMatchers("/api/v1/me/**").hasRole("VOLUNTEER") // a volunteer's own account and deliveries
+                .requestMatchers("/api/v1/dashboard/**", "/api/v1/requests/**", "/api/v1/vendors/**",
+                        "/api/v1/coworkers/**", "/api/v1/areas/**", "/api/v1/pickups/**",
+                        "/api/v1/join-requests/**", "/api/v1/volunteers/**", "/api/v1/messages/**", "/api/v1/texts/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
         return http.build();
     }

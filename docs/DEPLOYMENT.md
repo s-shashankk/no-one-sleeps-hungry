@@ -2,6 +2,28 @@
 
 **Host not decided yet** (PLAN §8). Shared hosting cannot run Spring Boot. You need a Linux VPS (or any host that runs Java 21 and MySQL 8). The steps below assume Ubuntu with nginx.
 
+## 0. Fastest way: Docker on one server
+On any Linux VPS with Docker and a domain name pointing at it:
+1. `cp deploy/.env.example deploy/.env` and fill it in (domain, passwords, first admin).
+2. `docker compose -f docker-compose.prod.yml --env-file deploy/.env up -d --build`
+3. Open `https://your-domain`. HTTPS is automatic (Caddy). Sign in with the admin from `.env`, then delete the `MEALUP_ADMIN_*` lines and run the same command again.
+4. Database data lives in the `mysql_data` Docker volume. Back it up (section 5).
+The sections below describe the same setup done by hand (systemd + nginx).
+
+## 0b. Hostinger KVM 2, step by step (Docker)
+1. In hPanel create the VPS with the **Ubuntu + Docker** template. Point the domain's A records (`@` and `www`) at the VPS IP.
+2. `ssh root@VPS_IP`, then: `adduser deploy && usermod -aG sudo,docker deploy`, and sign in as `deploy` from now on.
+3. Firewall: `sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable`. Never open 3306 or 8080.
+4. Swap (the build needs memory): `sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile && echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab`.
+5. `git clone https://github.com/s-shashankk/no-one-sleeps-hungry.git mealup && cd mealup`.
+6. `cp deploy/.env.example deploy/.env` and `cp deploy/application-local.yml.example deploy/application-local.yml`; fill both in with `nano`; `chmod 600 deploy/.env`, `chmod 644 deploy/application-local.yml`.
+7. `docker compose -f docker-compose.prod.yml --env-file deploy/.env up -d --build` (the first build takes several minutes).
+8. Check: `docker compose -f docker-compose.prod.yml ps`, `docker compose -f docker-compose.prod.yml logs api --tail 50`, then open `https://your-domain/api/v1/health`.
+9. Update later: `git pull && docker compose -f docker-compose.prod.yml --env-file deploy/.env up -d --build`.
+10. Nightly backup: `crontab -e` and add `15 2 * * * cd ~/mealup && ./ops/backup.sh >> ~/mealup-backup.log 2>&1`.
+
+`deploy/application-local.yml` creates the partner hotel (Sherpa), the plates served before launch (`opening-plates`) and the extra logins. It is read on every start and never duplicates anything.
+
 ## 1. What runs where
 | Piece | How |
 |---|---|
@@ -64,7 +86,9 @@ server { listen 80; server_name mealup.example.org; return 301 https://$host$req
 `forward-headers-strategy: native` makes Tomcat trust forwarded headers only from a proxy on the same machine or private network. This matters: the rate limiter keys on the client address. If the API is reached through a different kind of proxy/CDN, check this.
 
 ## 5. Backups and restore
-- `ops/backup.sh` (database dump, keeps 14 days). Cron: `15 2 * * * env-file-loaded ops/backup.sh`. Also copy backups off the server.
+- `ops/backup.sh` (database dump taken through Docker, keeps 14 days). Run it from the project folder. Cron: `15 2 * * * cd /opt/mealup && ./ops/backup.sh >> /var/log/mealup-backup.log 2>&1`. Also copy backups off the server.
+- The compose file limits container memory and log size, so one container cannot use the whole server or fill the disk.
+- Public numbers (meals served, areas, partner hotels) are kept in memory and rebuilt once a day at 00:05 India time and on each restart. The editable website wording is kept in memory for 10 minutes and hotel logos for 6 hours (both are refreshed at once when an admin saves or uploads), so visitors rarely reach the database for them. Every signed-in request used to re-check the person in the database; that check is now remembered for 45 seconds (dropped at once when an admin disables someone or changes their role). Places left today for a hotel stay live. To show a change straight away (a new hotel, say), restart the `api` container: `docker compose -f docker-compose.prod.yml restart api`.
 - `ops/restore-check.sh <dump.gz>` restores into a scratch database and compares table counts.
 - **Do the restore check once before the pilot and record the date in docs/PILOT.md.** An untested backup is not a backup.
 - Full restore: stop the service, `gunzip -c db-*.sql.gz | mysql mealup`, start the service.

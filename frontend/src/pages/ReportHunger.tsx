@@ -38,32 +38,39 @@ export default function ReportHunger() {
   if (done) {
     return (
       <div className="card">
-        <h1>Thank you 🙏</h1>
+        <h1>Thank you for caring 🙏</h1>
         <p>{done}</p>
         <p className="hint">If someone is in immediate danger or needs urgent medical help, please call your local emergency number.</p>
-        <Link to="/">Back to home</Link>
+        <div className="recap">
+          <strong>Can you carry food there yourself?</strong> If you can, choose a kind hotel and bring a meal. It would mean the world to them.
+        </div>
+        <p className="actions">
+          <Link className="btn primary" to={`/deliver?to=${encodeURIComponent(location)}`}>Yes, I will take food</Link>
+          <Link className="btn" to="/">Back to home</Link>
+        </p>
       </div>
     )
   }
 
   return (
     <form className="card form" onSubmit={submit}>
-      <h1>Tell us about people who need food</h1>
-      <p className="hint">Our team will check the report and may call before any food is sent. Reports are private and are never shown publicly.</p>
+      <h1>Have you seen someone hungry?</h1>
+      <p className="lead">Thank you for not looking away. Tell us where they are, and we will do everything we can to get a warm meal to them.</p>
+      <p className="hint">We may call you once to be sure we reach the right place. What you share is private and never shown publicly.</p>
 
-      <label>Where are they? (place, landmark or address)
+      <label>Where are they? (street, landmark or address)
         <input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={500} required />
       </label>
-      <label>About how many people?
+      <label>About how many people are hungry?
         <input type="number" min="1" max="10000" step="1" value={people} onChange={(e) => setPeople(e.target.value)} required />
       </label>
-      <label>Anything we should know? (optional)
-        <input value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} placeholder="e.g. families with children, no cooking facilities" />
+      <label>Anything else we should know? (optional)
+        <input value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} placeholder="e.g. a family with small children, no place to cook" />
       </label>
 
       <fieldset>
         <legend>Your details (optional)</legend>
-        <p className="hint">Only the MealUp team sees these, so we can call you to check.</p>
+        <p className="hint">Only the helpsomeone.in team sees these, so we can call you to check.</p>
         <label>Your name<input value={name} onChange={(e) => setName(e.target.value)} maxLength={120} /></label>
         <label>Your phone number<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91…" /></label>
       </fieldset>
@@ -75,11 +82,11 @@ export default function ReportHunger() {
 
       <label className="check">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required />
-        I agree that MealUp may use this information only to check the report and arrange food. It will be kept private.
+        I agree that helpsomeone.in may use this information only to check the report and arrange food. It will be kept private.
       </label>
       {error && <p className="error">{error}</p>}
       <p className="muted">See our <Link to="/privacy">privacy notice</Link>.</p>
-      <button className="btn primary" disabled={busy}>{busy ? 'Sending…' : 'Send report'}</button>
+      <button className="btn primary" disabled={busy}>{busy ? 'Sending…' : 'Send this to the team'}</button>
     </form>
   )
 }
