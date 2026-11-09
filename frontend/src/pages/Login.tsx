@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ApiRequestError } from '../api'
 import { useAuth } from '../auth'
 import type { Me } from '../types'
@@ -13,7 +13,6 @@ export function landing(me: Me, from?: string): string {
 
 export default function Login() {
   const { me, login } = useAuth()
-  const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from
   const [email, setEmail] = useState('')

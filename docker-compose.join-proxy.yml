@@ -1,0 +1,15 @@
+# Extra file for a server whose existing website already runs a Caddy container on ports 80/443.
+# It lets that Caddy reach this site's "edge" container by the name helpsomeone-edge, over a shared Docker network,
+# so the existing site's Caddy can add HTTPS for helpsomeone.in and forward it here.
+# Set PROXY_NETWORK to the name of the existing site's Docker network (docker inspect <its caddy container>).
+#   PROXY_NETWORK=xxxx_default docker compose -f docker-compose.shared.yml -f docker-compose.join-proxy.yml --env-file deploy/.env up -d --build
+services:
+  edge:
+    networks:
+      default: {}
+      proxy:
+        aliases: [helpsomeone-edge]
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK}
