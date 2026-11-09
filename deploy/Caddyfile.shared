@@ -1,0 +1,32 @@
+# Used only with docker-compose.shared.yml. HTTPS is done by the web server that already runs on this machine,
+# so this one speaks plain http on 127.0.0.1:8081 and trusts the forwarded visitor address it is given.
+{
+	auto_https off
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	handle /api/* {
+		request_body {
+			max_size 1MB
+		}
+		reverse_proxy api:8080
+	}
+
+	handle {
+		header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'"
+		reverse_proxy web:80
+	}
+}

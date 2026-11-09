@@ -24,6 +24,20 @@ The sections below describe the same setup done by hand (systemd + nginx).
 
 `deploy/application-local.yml` creates the partner hotel (Sherpa), the plates served before launch (`opening-plates`) and the extra logins. It is read on every start and never duplicates anything.
 
+## 0c. Server that already hosts another site
+Use `docker-compose.shared.yml` instead of `docker-compose.prod.yml`. It never uses ports 80/443 and has its own project name, network and database volume, so the existing site is not touched.
+1. Look first (read-only): `sudo ss -tlnp | grep -E ':80|:443'`, `docker ps`, `free -h`, `df -h`, `sudo ufw status`. Do not run `ufw enable` or change the firewall if it is already set up.
+2. Start: `docker compose -f docker-compose.shared.yml --env-file deploy/.env up -d --build` (run it as `nice -n 10 docker compose ...` so the build does not slow the other site).
+3. Test locally on the server: `curl -s http://127.0.0.1:8081/api/v1/health`.
+4. Make the existing web server send the new domain to `127.0.0.1:8081`:
+   - nginx: a new file in `/etc/nginx/sites-available/helpsomeone` with
+     `server { server_name helpsomeone.in www.helpsomeone.in; location / { proxy_pass http://127.0.0.1:8081; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $remote_addr; proxy_set_header X-Forwarded-Proto $scheme; } }`,
+     link it into `sites-enabled`, then `sudo nginx -t && sudo systemctl reload nginx` and `sudo certbot --nginx -d helpsomeone.in -d www.helpsomeone.in`.
+   - Caddy on the host: `helpsomeone.in, www.helpsomeone.in { reverse_proxy 127.0.0.1:8081 }`, then reload.
+   - Another tool (Traefik, Nginx Proxy Manager, hPanel): add a host `helpsomeone.in` that forwards to `127.0.0.1:8081` and passes `X-Forwarded-For` and `X-Forwarded-Proto`.
+5. The forwarded visitor address matters: the sign-in limit and the rate limits use it. Without `X-Forwarded-For` every visitor looks like one person.
+Updating later: `git pull` and the same `up -d --build` command. Stopping only this site: `docker compose -f docker-compose.shared.yml down` (never add `-v`, it deletes the database).
+
 ## 1. What runs where
 | Piece | How |
 |---|---|

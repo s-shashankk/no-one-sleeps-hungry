@@ -1,0 +1,82 @@
+# For a server that ALREADY runs another website (Hostinger VPS, existing nginx/Caddy/Docker on ports 80 and 443).
+# Nothing here touches ports 80/443 or any existing container, network or volume:
+#  - everything lives under its own project name "helpsomeone" (own network and own database volume),
+#  - the only port opened is 127.0.0.1:8081, reachable from this server only (the existing web server forwards the domain to it).
+#  docker compose -f docker-compose.shared.yml --env-file deploy/.env up -d --build
+# See docs/DEPLOYMENT.md, section "Server that already hosts another site".
+name: helpsomeone
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}   # stops container logs from filling the disk
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: mealup
+      MYSQL_USER: mealup
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci",
+              "--innodb-buffer-pool-size=384M", "--max-connections=100"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}   # stops container logs from filling the disk
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/mealup?connectionTimeZone=UTC
+      DB_USER: mealup
+      DB_PASSWORD: ${DB_PASSWORD}
+      MEALUP_ADMIN_NAME: ${MEALUP_ADMIN_NAME:-}
+      MEALUP_ADMIN_PHONE: ${MEALUP_ADMIN_PHONE:-}
+      MEALUP_ADMIN_EMAIL: ${MEALUP_ADMIN_EMAIL:-}
+      MEALUP_ADMIN_PASSWORD: ${MEALUP_ADMIN_PASSWORD:-}
+      SPRING_CONFIG_IMPORT: optional:file:/config/application-local.yml   # hotel, personal logins, opening plates (private file)
+      JAVA_TOOL_OPTIONS: -XX:+ExitOnOutOfMemoryError   # if Java runs out of memory it stops and Docker restarts it cleanly
+    volumes:
+      - ./deploy/application-local.yml:/config/application-local.yml:ro
+
+  web:
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}   # stops container logs from filling the disk
+    build:
+      context: ./frontend
+      args:
+        VITE_CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-}
+    restart: unless-stopped
+
+  edge:
+    image: caddy:2
+    restart: unless-stopped
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    depends_on:
+      - api
+      - web
+    ports:
+      - "127.0.0.1:8081:80"       # only this computer can reach it; the existing web server forwards the domain here
+    volumes:
+      - ./deploy/Caddyfile.shared:/etc/caddy/Caddyfile:ro
+
+volumes:
+  mysql_data:
