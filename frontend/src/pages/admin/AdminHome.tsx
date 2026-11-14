@@ -10,6 +10,22 @@ export default function AdminHome() {
   const { me } = useAuth()
   const [s, setS] = useState<DashboardSummary | null>(null)
   const [error, setError] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshNote, setRefreshNote] = useState('')
+
+  /** Rebuilds the public home page (numbers, hotels, logos) now, instead of waiting for the nightly rebuild. */
+  const refreshPublic = async () => {
+    setRefreshing(true)
+    setRefreshNote('')
+    try {
+      await api<{ builtAt: string }>('/api/v1/dashboard/refresh-public', { method: 'POST' })
+      setRefreshNote('Done. The home page now shows the latest numbers, hotels and logos.')
+    } catch (e) {
+      setRefreshNote(errorText(e))
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   useEffect(() => {
     const load = () => api<DashboardSummary>('/api/v1/dashboard')
@@ -29,7 +45,11 @@ export default function AdminHome() {
           <Link className="btn warm" to="/admin/pickups">Open hotel pickups</Link>
           <Link className="btn light" to="/admin/requests?add=1">Add a request</Link>
           <Link className="btn light" to="/admin/texts">Edit site text</Link>
+          <button type="button" className="btn light" onClick={refreshPublic} disabled={refreshing}>
+            {refreshing ? 'Updating…' : 'Update public website now'}
+          </button>
         </div>
+        {refreshNote && <p className="muted">{refreshNote}</p>}
       </section>
       <div className="card">
         {error && <p className="error">{error}</p>}

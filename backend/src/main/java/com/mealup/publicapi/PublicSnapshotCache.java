@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+import com.mealup.vendors.LogoChangedEvent;
 
 import com.mealup.publicapi.PublicDtos.Impact;
 import com.mealup.publicapi.PublicDtos.PublicArea;
@@ -63,6 +66,17 @@ public class PublicSnapshotCache {
         } catch (RuntimeException e) {
             log.error("Could not refresh the public numbers; keeping the previous copy.", e);
             if (snapshot == null) throw e;
+        }
+    }
+
+    /** A logo was uploaded or removed: rebuild right after the change is saved, so the home page shows it without waiting for the daily refresh. */
+    @TransactionalEventListener(fallbackExecution = true)
+    public void onLogoChanged(LogoChangedEvent event) {
+        if (!enabled) return;
+        try {
+            refresh();
+        } catch (RuntimeException e) {
+            log.warn("Could not refresh the public numbers after a logo change.", e);
         }
     }
 

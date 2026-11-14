@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +25,11 @@ public class LogoStore {
 
     private final java.util.Map<Long, Cached> cache = new ConcurrentHashMap<>();
     private final JdbcTemplate jdbc;
+    private final ApplicationEventPublisher events;
 
-    public LogoStore(JdbcTemplate jdbc) {
+    public LogoStore(JdbcTemplate jdbc, ApplicationEventPublisher events) {
         this.jdbc = jdbc;
+        this.events = events;
     }
 
     public void save(long vendorId, String contentType, byte[] data) {
@@ -34,11 +37,13 @@ public class LogoStore {
                 + "ON DUPLICATE KEY UPDATE content_type = VALUES(content_type), data = VALUES(data), version = VALUES(version)",
                 vendorId, contentType, data, System.currentTimeMillis());
         cache.remove(vendorId);
+        events.publishEvent(new LogoChangedEvent(vendorId));
     }
 
     public void delete(long vendorId) {
         jdbc.update("DELETE FROM vendor_logos WHERE vendor_id = ?", vendorId);
         cache.remove(vendorId);
+        events.publishEvent(new LogoChangedEvent(vendorId));
     }
 
     public Optional<Logo> find(long vendorId) {
